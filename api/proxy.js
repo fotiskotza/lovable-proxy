@@ -18,15 +18,24 @@ export default async function handler(req, res) {
     const response = await fetch(targetUrl);
     const html = await response.text();
 
-    // Extract contents inside <body>...</body>
+    console.log("------ Raw HTML Start ------");
+    console.log(html.slice(0, 1000)); // Log first 1000 characters
+    console.log("------ Raw HTML End ------");
+
+    // Try body content extraction again
     const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/);
-    if (!bodyMatch) throw new Error("No <body> found");
+    if (!bodyMatch) throw new Error("No <body> tag found in response");
 
-    const rawText = bodyMatch[1].replace(/<script[\s\S]*?<\/script>/g, "").trim();
+    const rawText = bodyMatch[1]
+      .replace(/<script[\s\S]*?<\/script>/gi, "") // strip scripts
+      .replace(/<\/?[^>]+(>|$)/g, "") // strip remaining HTML tags
+      .trim();
 
-    // This should now be the plain JSON text from document.body.textContent
+    console.log("------ Raw Text from <body> ------");
+    console.log(rawText.slice(0, 1000)); // Log first 1000 chars
+    console.log("------ End Raw Text ------");
+
     const json = JSON.parse(rawText);
-
     res.setHeader("Content-Type", "application/json");
     res.status(200).json(json);
   } catch (error) {
