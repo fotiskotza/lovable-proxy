@@ -12,16 +12,15 @@ export default async function handler(req, res) {
   }
 
   const targetUrl = `https://precise-latlon-finder.lovable.app/api/json?${query}`;
-  console.log("Fetching from:", targetUrl); // 👈 log this
+  console.log("Fetching from:", targetUrl);
 
   try {
     const response = await fetch(targetUrl);
-    const text = await response.text(); // <-- get raw response
-    console.log("Raw response:", text); // 👈 log it
+    const text = await response.text(); // don't parse!
 
-    const data = JSON.parse(text); // manually parse
+    // Just forward the raw text as-is
     res.setHeader("Content-Type", "application/json");
-    res.status(200).json(data);
+    res.status(200).send(text); // ✅ don't JSON.parse()
   } catch (error) {
     console.error("Proxy fetch error:", error);
     res.status(500).json({ success: false, error: "Failed to fetch from Lovable API" });
