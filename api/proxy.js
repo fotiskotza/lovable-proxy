@@ -16,13 +16,19 @@ export default async function handler(req, res) {
 
   try {
     const response = await fetch(targetUrl);
-    const text = await response.text(); // don't parse!
+    const html = await response.text();
 
-    // Just forward the raw text as-is
+    // Regex to extract JSON from <pre>{...}</pre>
+    const match = html.match(/<pre.*?>(.*?)<\/pre>/s);
+    if (!match) throw new Error("Could not extract JSON from HTML");
+
+    const extractedJson = match[1];
+    const data = JSON.parse(extractedJson);
+
     res.setHeader("Content-Type", "application/json");
-    res.status(200).send(text); // ✅ don't JSON.parse()
+    res.status(200).json(data);
   } catch (error) {
     console.error("Proxy fetch error:", error);
-    res.status(500).json({ success: false, error: "Failed to fetch from Lovable API" });
+    res.status(500).json({ success: false, error: "Failed to fetch or parse Lovable response" });
   }
 }
