@@ -18,15 +18,17 @@ export default async function handler(req, res) {
     const response = await fetch(targetUrl);
     const html = await response.text();
 
-    // Regex to extract JSON from <pre>{...}</pre>
-    const match = html.match(/<pre.*?>(.*?)<\/pre>/s);
-    if (!match) throw new Error("Could not extract JSON from HTML");
+    // Extract contents inside <body>...</body>
+    const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/);
+    if (!bodyMatch) throw new Error("No <body> found");
 
-    const extractedJson = match[1];
-    const data = JSON.parse(extractedJson);
+    const rawText = bodyMatch[1].replace(/<script[\s\S]*?<\/script>/g, "").trim();
+
+    // This should now be the plain JSON text from document.body.textContent
+    const json = JSON.parse(rawText);
 
     res.setHeader("Content-Type", "application/json");
-    res.status(200).json(data);
+    res.status(200).json(json);
   } catch (error) {
     console.error("Proxy fetch error:", error);
     res.status(500).json({ success: false, error: "Failed to fetch or parse Lovable response" });
