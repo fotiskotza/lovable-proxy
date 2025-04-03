@@ -12,10 +12,14 @@ export default async function handler(req, res) {
   }
 
   const targetUrl = `https://precise-latlon-finder.lovable.app/api/json?${query}`;
+  console.log("Fetching from:", targetUrl); // 👈 log this
 
   try {
     const response = await fetch(targetUrl);
-    const data = await response.json();
+    const text = await response.text(); // <-- get raw response
+    console.log("Raw response:", text); // 👈 log it
+
+    const data = JSON.parse(text); // manually parse
     res.setHeader("Content-Type", "application/json");
     res.status(200).json(data);
   } catch (error) {
