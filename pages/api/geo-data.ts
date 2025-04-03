@@ -4,8 +4,8 @@ import {
   findContainingPolygons,
   generateCardinalPoints,
   findSmallestContainingPolygon,
-} from '@/utils/polygonUtils';
-import { geocodeAddress } from '@/utils/geocoding';
+} from '../../utils/polygonUtils';
+import { geocodeAddress } from '../../utils/geocoding';
 
 interface ApiResponse {
   success: boolean;
